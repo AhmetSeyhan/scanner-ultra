@@ -19,6 +19,7 @@ class HashDatabase:
         if redis_url:
             try:
                 import redis
+
                 self._redis = redis.from_url(redis_url, decode_responses=True)
                 self._redis.ping()
                 logger.info("Hash DB connected to Redis")
@@ -33,6 +34,7 @@ class HashDatabase:
         if self._redis:
             try:
                 import json
+
                 data = self._redis.get(f"scan:{content_hash}")
                 if data:
                     return json.loads(data)
@@ -47,8 +49,8 @@ class HashDatabase:
         if self._redis:
             try:
                 import json
-                self._redis.setex(f"scan:{content_hash}", self.ttl,
-                                  json.dumps(result, default=str))
+
+                self._redis.setex(f"scan:{content_hash}", self.ttl, json.dumps(result, default=str))
             except Exception:
                 pass
         self._cache[content_hash] = {"result": result, "_at": time.time()}

@@ -22,8 +22,9 @@ THREAT_MAP = {
 
 
 class TrustScoreEngine:
-    def compute(self, fused_score: float, confidence: float,
-                modality_details: dict[str, Any] | None = None) -> dict[str, Any]:
+    def compute(
+        self, fused_score: float, confidence: float, modality_details: dict[str, Any] | None = None
+    ) -> dict[str, Any]:
         trust_score = max(0.0, min(1.0, 1.0 - fused_score))
         verdict = self._to_verdict(trust_score, confidence)
         threat = THREAT_MAP.get(verdict, ThreatLevel.MEDIUM)

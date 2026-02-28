@@ -57,9 +57,7 @@ class AttributionEngine:
             logger.debug("No frames provided, skipping spectral analysis")
 
         # Step 2: Generator fingerprinting
-        fingerprint_result = self.fingerprinter.fingerprint(
-            spectral_result, detector_results, defense_results
-        )
+        fingerprint_result = self.fingerprinter.fingerprint(spectral_result, detector_results, defense_results)
 
         # Step 3: Build attribution report
         attribution_report = self._build_report(fingerprint_result, spectral_result)
@@ -73,16 +71,16 @@ class AttributionEngine:
         spectral_fps = []
         if spectral_result and spectral_result.fingerprints:
             for fp in spectral_result.fingerprints[:2]:  # Include first 2
-                spectral_fps.append({
-                    "band_energies": fp.band_energies,
-                    "centroid": round(fp.centroid, 4),
-                    "has_periodic_peaks": fp.has_periodic_peaks,
-                })
+                spectral_fps.append(
+                    {
+                        "band_energies": fp.band_energies,
+                        "centroid": round(fp.centroid, 4),
+                        "has_periodic_peaks": fp.has_periodic_peaks,
+                    }
+                )
 
         # Forensic score (weighted combination)
-        forensic_score = self._compute_forensic_score(
-            fingerprint_result, spectral_result, detector_results
-        )
+        forensic_score = self._compute_forensic_score(fingerprint_result, spectral_result, detector_results)
 
         return ForensicDNAResult(
             generator_detected=generator_detected,

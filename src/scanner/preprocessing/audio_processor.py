@@ -27,8 +27,9 @@ class AudioFeatures:
 
 
 class AudioProcessor:
-    def __init__(self, target_sr: int = 16000, max_duration: float = 10.0,
-                 n_bins: int = 84, hop_length: int = 512) -> None:
+    def __init__(
+        self, target_sr: int = 16000, max_duration: float = 10.0, n_bins: int = 84, hop_length: int = 512
+    ) -> None:
         self.target_sr = target_sr
         self.max_duration = max_duration
         self.n_bins = n_bins
@@ -43,11 +44,15 @@ class AudioProcessor:
             waveform, sr = self._load_audio(tmp_path)
             cqt = self._compute_cqt(waveform, sr)
             log_spec = self._compute_log_spectrogram(waveform, sr)
-            rms = float(np.sqrt(np.mean(waveform ** 2))) if waveform is not None else 0.0
+            rms = float(np.sqrt(np.mean(waveform**2))) if waveform is not None else 0.0
             return AudioFeatures(
-                waveform=waveform, sr=sr, cqt=cqt, log_spec=log_spec,
+                waveform=waveform,
+                sr=sr,
+                cqt=cqt,
+                log_spec=log_spec,
                 duration_sec=len(waveform) / sr if waveform is not None and sr > 0 else 0.0,
-                rms_energy=rms, metadata={"source_file": filename},
+                rms_energy=rms,
+                metadata={"source_file": filename},
             )
         except Exception:
             logger.exception("Audio processing failed for %s", filename)
@@ -56,8 +61,8 @@ class AudioProcessor:
     def _load_audio(self, path: str) -> tuple[np.ndarray | None, int]:
         try:
             import librosa
-            waveform, sr = librosa.load(path, sr=self.target_sr, mono=True,
-                                         duration=self.max_duration)
+
+            waveform, sr = librosa.load(path, sr=self.target_sr, mono=True, duration=self.max_duration)
             return waveform, sr
         except ImportError:
             return self._load_with_scipy(path)
@@ -65,6 +70,7 @@ class AudioProcessor:
     def _load_with_scipy(self, path: str) -> tuple[np.ndarray | None, int]:
         try:
             from scipy.io import wavfile
+
             sr, data = wavfile.read(path)
             if data.dtype != np.float32:
                 data = data.astype(np.float32) / np.iinfo(data.dtype).max
@@ -79,8 +85,10 @@ class AudioProcessor:
             return None
         try:
             import librosa
-            cqt = np.abs(librosa.cqt(waveform, sr=sr, n_bins=self.n_bins,
-                                      bins_per_octave=12, hop_length=self.hop_length))
+
+            cqt = np.abs(
+                librosa.cqt(waveform, sr=sr, n_bins=self.n_bins, bins_per_octave=12, hop_length=self.hop_length)
+            )
             return librosa.amplitude_to_db(cqt, ref=np.max)
         except ImportError:
             return None
@@ -91,6 +99,7 @@ class AudioProcessor:
             return None
         try:
             from scipy.signal import stft
+
             _, _, zxx = stft(waveform, fs=sr, nperseg=1024, noverlap=768)
             return 10 * np.log10(np.abs(zxx) ** 2 + 1e-10)
         except ImportError:
@@ -99,9 +108,10 @@ class AudioProcessor:
     async def process_waveform(self, waveform: np.ndarray, sr: int) -> AudioFeatures:
         waveform = waveform[: int(self.max_duration * sr)]
         return AudioFeatures(
-            waveform=waveform, sr=sr,
+            waveform=waveform,
+            sr=sr,
             cqt=self._compute_cqt(waveform, sr),
             log_spec=self._compute_log_spectrogram(waveform, sr),
             duration_sec=len(waveform) / sr if sr > 0 else 0.0,
-            rms_energy=float(np.sqrt(np.mean(waveform ** 2))),
+            rms_energy=float(np.sqrt(np.mean(waveform**2))),
         )

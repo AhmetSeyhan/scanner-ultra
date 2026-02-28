@@ -140,9 +140,7 @@ class EdgeOptimizer:
 
         # Convert to channels-last memory format
         try:
-            self.optimized_model = self.optimized_model.to(
-                memory_format=torch.channels_last
-            )
+            self.optimized_model = self.optimized_model.to(memory_format=torch.channels_last)
             logger.info("Memory layout optimized (channels-last)")
         except Exception as e:
             logger.warning(f"Memory layout optimization failed: {e}")
@@ -258,9 +256,7 @@ class EdgeOptimizer:
             # Get file size
             file_size_mb = output_path.stat().st_size / (1024**2)
 
-            logger.info(
-                f"Model exported successfully ({file_size_mb:.2f} MB)"
-            )
+            logger.info(f"Model exported successfully ({file_size_mb:.2f} MB)")
 
             return {
                 "success": True,
@@ -289,9 +285,7 @@ class EdgeOptimizer:
 
         if self.optimized_model is not None:
             # Count parameters
-            num_params = sum(
-                p.numel() for p in self.optimized_model.parameters()
-            )
+            num_params = sum(p.numel() for p in self.optimized_model.parameters())
             info["num_parameters"] = num_params
 
         return info
@@ -320,9 +314,7 @@ class EdgeOptimizer:
         original_bench = self._benchmark_model(self.model, input_shape, num_runs)
 
         # Benchmark optimized
-        optimized_bench = self._benchmark_model(
-            self.optimized_model, input_shape, num_runs
-        )
+        optimized_bench = self._benchmark_model(self.optimized_model, input_shape, num_runs)
 
         # Compute speedup
         speedup = original_bench["avg_latency_ms"] / optimized_bench["avg_latency_ms"]
@@ -337,10 +329,7 @@ class EdgeOptimizer:
             ),
         }
 
-        logger.info(
-            f"Comparison - Speedup: {speedup:.2f}x, "
-            f"Latency reduction: {results['latency_reduction_ms']:.2f}ms"
-        )
+        logger.info(f"Comparison - Speedup: {speedup:.2f}x, Latency reduction: {results['latency_reduction_ms']:.2f}ms")
 
         return results
 

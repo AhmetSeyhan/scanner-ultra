@@ -104,9 +104,7 @@ class PentaShieldEngine:
         start = time.perf_counter()
 
         # === HYDRA ENGINE ===
-        hydra = self._run_hydra(
-            detector_results, fused_score, media_type, frames
-        )
+        hydra = self._run_hydra(detector_results, fused_score, media_type, frames)
 
         # === ZERO-DAY SENTINEL ===
         sentinel = self._run_sentinel(detector_results, frames)
@@ -158,14 +156,10 @@ class PentaShieldEngine:
             perturbation_mag = purify_result.perturbation_magnitude
 
         # Step 2: Multi-head ensemble
-        mh_result = self.multi_head.evaluate(
-            detector_results, media_type, fused_score
-        )
+        mh_result = self.multi_head.evaluate(detector_results, media_type, fused_score)
 
         # Step 3: Minority report
-        mr_result = self.minority.analyze(
-            mh_result.head_verdicts, mh_result.agreement
-        )
+        mr_result = self.minority.analyze(mh_result.head_verdicts, mh_result.agreement)
 
         # Step 4: Adversarial audit
         audit_result = self.auditor.audit(
@@ -175,9 +169,7 @@ class PentaShieldEngine:
         )
 
         # Combine results
-        adversarial_detected = (
-            adversarial_from_purifier or audit_result.adversarial_detected
-        )
+        adversarial_detected = adversarial_from_purifier or audit_result.adversarial_detected
 
         minority_dict: dict[str, Any] | None = None
         if mr_result.has_dissent:
@@ -206,15 +198,14 @@ class PentaShieldEngine:
             physics_result = self.physics.verify(frames)
         else:
             from scanner.pentashield.sentinel.physics_verifier import PhysicsResult
+
             physics_result = PhysicsResult()  # defaults to 1.0
 
         # Step 3: Bio consistency
         bio_result = self.bio.check(detector_results, frames)
 
         # Step 4: Combine into sentinel result
-        sentinel_result = self.anomaly_scorer.score(
-            ood_result, physics_result, bio_result
-        )
+        sentinel_result = self.anomaly_scorer.score(ood_result, physics_result, bio_result)
 
         return sentinel_result
 
@@ -279,8 +270,7 @@ class PentaShieldEngine:
         if hydra.adversarial_detected:
             return (
                 Verdict.UNCERTAIN,
-                "Adversarial manipulation detected. Results may be unreliable. "
-                "Manual review required.",
+                "Adversarial manipulation detected. Results may be unreliable. Manual review required.",
             )
 
         # 2. Novel type → UNCERTAIN

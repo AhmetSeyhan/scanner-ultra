@@ -63,9 +63,7 @@ class ContinualLearner:
         self.ewc_initialized = False
 
         # Experience Replay: buffer of previous samples
-        self.replay_buffer: deque[tuple[torch.Tensor, torch.Tensor]] = deque(
-            maxlen=replay_buffer_size
-        )
+        self.replay_buffer: deque[tuple[torch.Tensor, torch.Tensor]] = deque(maxlen=replay_buffer_size)
 
         # Task tracking
         self.num_tasks_learned = 0
@@ -100,9 +98,7 @@ class ContinualLearner:
 
         self.model.eval()
         self.fisher_dict = {
-            n: torch.zeros_like(p, device=self.device)
-            for n, p in self.model.named_parameters()
-            if p.requires_grad
+            n: torch.zeros_like(p, device=self.device) for n, p in self.model.named_parameters() if p.requires_grad
         }
 
         samples_processed = 0
@@ -130,11 +126,7 @@ class ContinualLearner:
             samples_processed += inputs.size(0)
 
         # Save current parameters as optimal for this task
-        self.optimal_params = {
-            n: p.clone().detach()
-            for n, p in self.model.named_parameters()
-            if p.requires_grad
-        }
+        self.optimal_params = {n: p.clone().detach() for n, p in self.model.named_parameters() if p.requires_grad}
 
         self.ewc_initialized = True
         logger.info("Fisher Information Matrix computed")
@@ -158,9 +150,7 @@ class ContinualLearner:
                 # F_i: Fisher importance
                 # θ_i: current param
                 # θ*_i: optimal param from previous task
-                loss += (
-                    self.fisher_dict[n] * (p - self.optimal_params[n]) ** 2
-                ).sum()
+                loss += (self.fisher_dict[n] * (p - self.optimal_params[n]) ** 2).sum()
 
         return self.ewc_lambda * loss
 
@@ -177,10 +167,12 @@ class ContinualLearner:
         """
         # Add each sample individually
         for i in range(inputs.size(0)):
-            self.replay_buffer.append((
-                inputs[i].cpu().clone(),
-                labels[i].cpu().clone(),
-            ))
+            self.replay_buffer.append(
+                (
+                    inputs[i].cpu().clone(),
+                    labels[i].cpu().clone(),
+                )
+            )
 
     def sample_from_replay(self, batch_size: int) -> tuple[torch.Tensor, torch.Tensor] | None:
         """Sample batch from replay buffer.
@@ -231,10 +223,7 @@ class ContinualLearner:
         Returns:
             Training statistics
         """
-        logger.info(
-            f"Training with continual learning "
-            f"(epochs={epochs}, lr={lr}, task={self.num_tasks_learned + 1})"
-        )
+        logger.info(f"Training with continual learning (epochs={epochs}, lr={lr}, task={self.num_tasks_learned + 1})")
 
         self.model.train()
         optimizer = torch.optim.Adam(self.model.parameters(), lr=lr)
@@ -306,15 +295,12 @@ class ContinualLearner:
 
             if (epoch + 1) % 5 == 0:
                 logger.info(
-                    f"Epoch {epoch+1}/{epochs} - "
+                    f"Epoch {epoch + 1}/{epochs} - "
                     f"Loss: {avg_loss:.4f} (task: {avg_task_loss:.4f}, "
                     f"EWC: {avg_ewc_loss:.4f}), Acc: {acc:.2f}%"
                 )
 
-        logger.info(
-            f"Continual learning completed "
-            f"(final acc: {stats['accuracy'][-1]:.2f}%)"
-        )
+        logger.info(f"Continual learning completed (final acc: {stats['accuracy'][-1]:.2f}%)")
 
         return stats
 
@@ -386,7 +372,4 @@ class ContinualLearner:
         self.num_tasks_learned = state["num_tasks_learned"]
         self.ewc_initialized = state["ewc_initialized"]
 
-        logger.info(
-            f"Continual learner state loaded from {path} "
-            f"({self.num_tasks_learned} tasks learned)"
-        )
+        logger.info(f"Continual learner state loaded from {path} ({self.num_tasks_learned} tasks learned)")

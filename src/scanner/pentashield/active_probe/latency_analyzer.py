@@ -144,9 +144,7 @@ class BatchLatencyAnalyzer:
         """Initialize batch analyzer."""
         self.analyzer = LatencyAnalyzer()
 
-    def analyze_session(
-        self, challenge_response_pairs: list[tuple[str, int, list[int]]]
-    ) -> dict:
+    def analyze_session(self, challenge_response_pairs: list[tuple[str, int, list[int]]]) -> dict:
         """Analyze latency across all challenges in a session.
 
         Args:

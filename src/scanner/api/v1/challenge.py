@@ -127,9 +127,7 @@ async def get_challenge_session(session_id: str) -> ChallengeResponse:
 
 
 @router.post("/{session_id}/verify", response_model=VerifyChallengeResponse)
-async def verify_challenge_response(
-    session_id: str, request: VerifyChallengeRequest
-) -> VerifyChallengeResponse:
+async def verify_challenge_response(session_id: str, request: VerifyChallengeRequest) -> VerifyChallengeResponse:
     """Verify a challenge response and get next challenge or final result."""
     session = session_manager.get_session(session_id)
 

@@ -131,18 +131,14 @@ class DifferentialPrivacy:
             Clipped update
         """
         # Compute L2 norm of all parameters
-        total_norm = torch.sqrt(
-            sum(torch.sum(param**2) for param in update.values())
-        )
+        total_norm = torch.sqrt(sum(torch.sum(param**2) for param in update.values()))
 
         # Clip if norm exceeds sensitivity
         clip_coef = self.sensitivity / (total_norm + 1e-6)
         clip_coef = min(clip_coef, 1.0)
 
         # Apply clipping
-        clipped_update = {
-            key: value * clip_coef for key, value in update.items()
-        }
+        clipped_update = {key: value * clip_coef for key, value in update.items()}
 
         if clip_coef < 1.0:
             logger.debug(f"Gradients clipped (norm: {total_norm:.4f} → {self.sensitivity})")
@@ -251,8 +247,7 @@ class DifferentialPrivacy:
         recommended_multiplier = 1.0 / epsilon_per_query
 
         logger.info(
-            f"Recommended noise multiplier for ε={target_epsilon}, "
-            f"n={num_queries}: σ={recommended_multiplier:.4f}"
+            f"Recommended noise multiplier for ε={target_epsilon}, n={num_queries}: σ={recommended_multiplier:.4f}"
         )
 
         return recommended_multiplier

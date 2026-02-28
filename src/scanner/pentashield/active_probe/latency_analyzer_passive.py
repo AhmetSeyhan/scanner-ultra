@@ -146,9 +146,7 @@ class LatencyAnalyzer:
 
         return True
 
-    def _compute_score(
-        self, avg_interval: float, jitter: float, pipeline_latency: float
-    ) -> float:
+    def _compute_score(self, avg_interval: float, jitter: float, pipeline_latency: float) -> float:
         """Compute overall latency score (1.0 = normal, 0.0 = suspicious).
 
         Args:

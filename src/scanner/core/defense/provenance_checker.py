@@ -11,9 +11,14 @@ logger = logging.getLogger(__name__)
 class ProvenanceChecker:
     async def check(self, content: bytes, metadata: dict[str, Any] | None = None) -> dict[str, Any]:
         results: dict[str, Any] = {
-            "has_c2pa": False, "has_exif": False, "camera_make": None,
-            "camera_model": None, "creation_date": None, "editing_software": None,
-            "gps_data": False, "provenance_score": 0.5,
+            "has_c2pa": False,
+            "has_exif": False,
+            "camera_make": None,
+            "camera_model": None,
+            "creation_date": None,
+            "editing_software": None,
+            "gps_data": False,
+            "provenance_score": 0.5,
         }
         exif = self._extract_exif(content)
         if exif:
@@ -34,12 +39,12 @@ class ProvenanceChecker:
 
             from PIL import Image
             from PIL.ExifTags import TAGS
+
             img = Image.open(io.BytesIO(content))
             exif = img._getexif()
             if not exif:
                 return None
-            return {TAGS.get(k, k): v for k, v in exif.items()
-                    if isinstance(v, (str, int, float))}
+            return {TAGS.get(k, k): v for k, v in exif.items() if isinstance(v, (str, int, float))}
         except Exception:
             return None
 

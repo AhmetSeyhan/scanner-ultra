@@ -77,12 +77,8 @@ class MotionChallenge:
         tolerance = challenge_params.get("tolerance", 10)
 
         # Step 1: Measure angle achieved
-        angle_achieved = self._measure_head_angle(
-            frame_sequence, direction, baseline_frame
-        )
-        angle_accuracy = self._score_angle_accuracy(
-            angle_achieved, expected_angle, tolerance
-        )
+        angle_achieved = self._measure_head_angle(frame_sequence, direction, baseline_frame)
+        angle_accuracy = self._score_angle_accuracy(angle_achieved, expected_angle, tolerance)
 
         # Step 2: Measure motion smoothness
         smoothness = self._measure_smoothness(frame_sequence)
@@ -184,9 +180,7 @@ class MotionChallenge:
         return min(90.0, angle)  # Cap at 90 degrees
 
     @staticmethod
-    def _score_angle_accuracy(
-        achieved: float, expected: float, tolerance: float
-    ) -> float:
+    def _score_angle_accuracy(achieved: float, expected: float, tolerance: float) -> float:
         """Score how accurately the expected angle was achieved.
 
         Args:
@@ -272,9 +266,7 @@ class MotionChallenge:
             h, w = gray.shape
 
             # Assume face is center region
-            face_region = gray[
-                int(h * 0.2) : int(h * 0.8), int(w * 0.25) : int(w * 0.75)
-            ]
+            face_region = gray[int(h * 0.2) : int(h * 0.8), int(w * 0.25) : int(w * 0.75)]
 
             fh, fw = face_region.shape
             if fw > 0:
@@ -293,9 +285,7 @@ class MotionChallenge:
         return score
 
     @staticmethod
-    def _measure_response_latency(
-        frame_sequence: list[tuple[np.ndarray, int]]
-    ) -> float:
+    def _measure_response_latency(frame_sequence: list[tuple[np.ndarray, int]]) -> float:
         """Measure time from challenge start to first significant motion.
 
         Args:

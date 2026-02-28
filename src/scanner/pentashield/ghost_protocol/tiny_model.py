@@ -81,32 +81,38 @@ class TinyModelBackbone(nn.Module):
         layers = []
         # Expand
         if expand_ratio != 1:
-            layers.extend([
-                nn.Conv2d(in_channels, hidden_dim, 1, bias=False),
-                nn.BatchNorm2d(hidden_dim),
-                nn.Hardswish(),
-            ])
+            layers.extend(
+                [
+                    nn.Conv2d(in_channels, hidden_dim, 1, bias=False),
+                    nn.BatchNorm2d(hidden_dim),
+                    nn.Hardswish(),
+                ]
+            )
 
         # Depthwise
-        layers.extend([
-            nn.Conv2d(
-                hidden_dim,
-                hidden_dim,
-                kernel_size,
-                stride,
-                padding=kernel_size // 2,
-                groups=hidden_dim,
-                bias=False,
-            ),
-            nn.BatchNorm2d(hidden_dim),
-            nn.Hardswish(),
-        ])
+        layers.extend(
+            [
+                nn.Conv2d(
+                    hidden_dim,
+                    hidden_dim,
+                    kernel_size,
+                    stride,
+                    padding=kernel_size // 2,
+                    groups=hidden_dim,
+                    bias=False,
+                ),
+                nn.BatchNorm2d(hidden_dim),
+                nn.Hardswish(),
+            ]
+        )
 
         # Project
-        layers.extend([
-            nn.Conv2d(hidden_dim, out_channels, 1, bias=False),
-            nn.BatchNorm2d(out_channels),
-        ])
+        layers.extend(
+            [
+                nn.Conv2d(hidden_dim, out_channels, 1, bias=False),
+                nn.BatchNorm2d(out_channels),
+            ]
+        )
 
         block = nn.Sequential(*layers)
         if use_residual:
@@ -219,7 +225,7 @@ class TinyModel:
             correct = 0
             total = 0
 
-            for batch_idx, (inputs, labels) in enumerate(train_data):
+            for _batch_idx, (inputs, labels) in enumerate(train_data):
                 inputs = inputs.to(self.device)
                 labels = labels.to(self.device)
 
@@ -259,7 +265,7 @@ class TinyModel:
             history["acc"].append(acc)
 
             if (epoch + 1) % 10 == 0:
-                logger.info(f"Epoch {epoch+1}/{epochs} - Loss: {avg_loss:.4f}, Acc: {acc:.2f}%")
+                logger.info(f"Epoch {epoch + 1}/{epochs} - Loss: {avg_loss:.4f}, Acc: {acc:.2f}%")
 
         logger.info("Knowledge distillation completed")
         return history
@@ -305,7 +311,7 @@ class TinyModel:
             history["acc"].append(acc)
 
             if (epoch + 1) % 10 == 0:
-                logger.info(f"Epoch {epoch+1}/{epochs} - Loss: {avg_loss:.4f}, Acc: {acc:.2f}%")
+                logger.info(f"Epoch {epoch + 1}/{epochs} - Loss: {avg_loss:.4f}, Acc: {acc:.2f}%")
 
         return history
 
@@ -346,6 +352,7 @@ class TinyModel:
         for frame in frames:
             # Resize to 224x224
             from PIL import Image
+
             img = Image.fromarray(frame)
             img = img.resize((224, 224))
 

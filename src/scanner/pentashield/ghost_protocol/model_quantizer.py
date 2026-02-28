@@ -165,7 +165,7 @@ class ModelQuantizer:
 
             if (epoch + 1) % 5 == 0:
                 avg_loss = epoch_loss / len(train_data)
-                logger.info(f"QAT Epoch {epoch+1}/{epochs} - Loss: {avg_loss:.4f}")
+                logger.info(f"QAT Epoch {epoch + 1}/{epochs} - Loss: {avg_loss:.4f}")
 
         # Convert to quantized model
         prepared_model.eval()
@@ -265,10 +265,7 @@ class ModelQuantizer:
         quantized_size = self._get_model_size(self.quantized_model)
         reduction = (1 - quantized_size / original_size) * 100
 
-        logger.info(
-            f"Model size: {original_size:.2f} MB → {quantized_size:.2f} MB "
-            f"(reduction: {reduction:.1f}%)"
-        )
+        logger.info(f"Model size: {original_size:.2f} MB → {quantized_size:.2f} MB (reduction: {reduction:.1f}%)")
 
     def _get_model_size(self, model: nn.Module) -> float:
         """Get model size in MB."""

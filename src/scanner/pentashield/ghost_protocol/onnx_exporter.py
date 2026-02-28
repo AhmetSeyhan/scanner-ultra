@@ -294,7 +294,9 @@ class ONNXExporter:
                 "throughput_fps": round(1000.0 / np.mean(times), 2),
             }
 
-            logger.info(f"ONNX benchmark - Avg: {results['avg_latency_ms']:.2f}ms, FPS: {results['throughput_fps']:.2f}")
+            logger.info(
+                f"ONNX benchmark - Avg: {results['avg_latency_ms']:.2f}ms, FPS: {results['throughput_fps']:.2f}"
+            )
             return results
 
         except ImportError:
@@ -323,18 +325,22 @@ class ONNXExporter:
             input_info = []
             for inp in onnx_model.graph.input:
                 shape = [dim.dim_value if dim.dim_value > 0 else -1 for dim in inp.type.tensor_type.shape.dim]
-                input_info.append({
-                    "name": inp.name,
-                    "shape": shape,
-                })
+                input_info.append(
+                    {
+                        "name": inp.name,
+                        "shape": shape,
+                    }
+                )
 
             output_info = []
             for out in onnx_model.graph.output:
                 shape = [dim.dim_value if dim.dim_value > 0 else -1 for dim in out.type.tensor_type.shape.dim]
-                output_info.append({
-                    "name": out.name,
-                    "shape": shape,
-                })
+                output_info.append(
+                    {
+                        "name": out.name,
+                        "shape": shape,
+                    }
+                )
 
             return {
                 "path": str(model_path),

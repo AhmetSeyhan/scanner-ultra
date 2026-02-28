@@ -214,9 +214,7 @@ class GeneratorFingerprinter:
 
         # 3. Diffusion artifact (20% weight)
         if gen_family == "diffusion":
-            score += EVIDENCE_WEIGHTS["diffusion_artifact"] * evidence[
-                "diffusion_artifact_score"
-            ]
+            score += EVIDENCE_WEIGHTS["diffusion_artifact"] * evidence["diffusion_artifact_score"]
 
         # 4. Metadata (20% weight)
         if evidence["ai_software"]:
@@ -238,10 +236,7 @@ class GeneratorFingerprinter:
         Returns:
             List of candidates sorted by confidence (descending)
         """
-        ranked = [
-            {"name": name, "confidence": round(score, 4), "evidence": {}}
-            for name, score in scored.items()
-        ]
+        ranked = [{"name": name, "confidence": round(score, 4), "evidence": {}} for name, score in scored.items()]
 
         # Sort descending
         ranked.sort(key=lambda x: x["confidence"], reverse=True)

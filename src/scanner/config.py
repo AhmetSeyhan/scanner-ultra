@@ -103,6 +103,7 @@ class Settings(BaseSettings):
         if self.device == "auto":
             try:
                 import torch
+
                 return "cuda" if torch.cuda.is_available() else "cpu"
             except ImportError:
                 return "cpu"

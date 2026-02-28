@@ -17,7 +17,6 @@ import logging
 import uuid
 from typing import Any
 
-import numpy as np
 import torch
 import torch.nn as nn
 
@@ -96,10 +95,7 @@ class FederatedClient:
         Returns:
             Training statistics
         """
-        logger.info(
-            f"Client {self.client_id} starting local training "
-            f"(epochs={local_epochs}, lr={lr})"
-        )
+        logger.info(f"Client {self.client_id} starting local training (epochs={local_epochs}, lr={lr})")
 
         self.model.train()
         optimizer = torch.optim.SGD(self.model.parameters(), lr=lr)
@@ -138,8 +134,7 @@ class FederatedClient:
             stats["samples"] = total
 
             logger.debug(
-                f"Client {self.client_id} - Epoch {epoch+1}/{local_epochs} "
-                f"- Loss: {avg_loss:.4f}, Acc: {acc:.2f}%"
+                f"Client {self.client_id} - Epoch {epoch + 1}/{local_epochs} - Loss: {avg_loss:.4f}, Acc: {acc:.2f}%"
             )
 
         self.local_epochs_completed += local_epochs

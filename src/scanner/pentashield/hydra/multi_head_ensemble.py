@@ -60,9 +60,7 @@ class MultiHeadResult:
     head_verdicts: list[float] = field(default_factory=list)
     consensus_score: float = 0.5
     agreement: float = 1.0
-    head_names: list[str] = field(
-        default_factory=lambda: ["conservative", "statistical", "specialist"]
-    )
+    head_names: list[str] = field(default_factory=lambda: ["conservative", "statistical", "specialist"])
 
     def to_dict(self) -> dict[str, Any]:
         return {

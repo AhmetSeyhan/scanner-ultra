@@ -16,8 +16,7 @@ class TemporalConsistency:
 
     def analyze(self, frame_scores: list[float]) -> dict[str, Any]:
         if not frame_scores or len(frame_scores) < 2:
-            return {"consistency": 0.5, "trend": "unknown", "flickering": False,
-                    "confidence_modifier": 1.0}
+            return {"consistency": 0.5, "trend": "unknown", "flickering": False, "confidence_modifier": 1.0}
 
         arr = np.array(frame_scores)
         diffs = np.abs(np.diff(arr))
@@ -41,8 +40,10 @@ class TemporalConsistency:
             cm = 0.8 + 0.4 * smoothness
 
         return {
-            "consistency": round(smoothness, 4), "trend": trend,
-            "flickering": is_flickering, "flicker_rate": round(flicker_rate, 4),
+            "consistency": round(smoothness, 4),
+            "trend": trend,
+            "flickering": is_flickering,
+            "flicker_rate": round(flicker_rate, 4),
             "score_std": round(float(np.std(arr)), 4),
             "confidence_modifier": round(min(1.5, cm), 4),
         }

@@ -82,9 +82,7 @@ class SessionManager:
         session_id = f"session_{secrets.token_hex(16)}"
 
         # Generate random challenges
-        challenges = self.protocol.generate_session_challenges(
-            num_challenges, challenge_types
-        )
+        challenges = self.protocol.generate_session_challenges(num_challenges, challenge_types)
 
         # Create session
         now = int(time.time() * 1000)
@@ -224,22 +222,16 @@ class SessionManager:
             "challenges_remaining": len(session.challenges) - session.current_challenge_index,
         }
 
-    def _verify_light_challenge(
-        self, challenge: Challenge, response_data: dict
-    ) -> dict[str, Any]:
+    def _verify_light_challenge(self, challenge: Challenge, response_data: dict) -> dict[str, Any]:
         """Verify light challenge response."""
         frame_sequence = response_data.get("frame_sequence", [])
         color_sequence = challenge.parameters.get("sequence", [])
 
-        result = self.light_verifier.verify(
-            challenge.challenge_id, color_sequence, frame_sequence
-        )
+        result = self.light_verifier.verify(challenge.challenge_id, color_sequence, frame_sequence)
 
         return result.__dict__
 
-    def _verify_motion_challenge(
-        self, challenge: Challenge, response_data: dict
-    ) -> dict[str, Any]:
+    def _verify_motion_challenge(self, challenge: Challenge, response_data: dict) -> dict[str, Any]:
         """Verify motion challenge response."""
         frame_sequence = response_data.get("frame_sequence", [])
         baseline_frame = response_data.get("baseline_frame")
@@ -254,9 +246,7 @@ class SessionManager:
         return result.__dict__
 
     @staticmethod
-    def _verify_audio_challenge(
-        challenge: Challenge, response_data: dict
-    ) -> dict[str, Any]:
+    def _verify_audio_challenge(challenge: Challenge, response_data: dict) -> dict[str, Any]:
         """Verify audio challenge response (placeholder)."""
         # TODO: Implement audio verification (speech-to-text + matching)
         return {
@@ -268,11 +258,7 @@ class SessionManager:
     def _finalize_session(self, session: ChallengeSession) -> None:
         """Finalize session after all challenges complete."""
         # Count passed challenges
-        passed_count = sum(
-            1
-            for result in session.challenge_results.values()
-            if result.get("passed", False)
-        )
+        passed_count = sum(1 for result in session.challenge_results.values() if result.get("passed", False))
 
         # Session passes if majority of challenges passed
         required_passes = len(session.challenges) // 2 + 1

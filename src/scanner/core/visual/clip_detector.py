@@ -48,13 +48,17 @@ class CLIPDetector(BaseDetector):
 
     @property
     def capabilities(self) -> set[DetectorCapability]:
-        return {DetectorCapability.VIDEO_FRAMES, DetectorCapability.SINGLE_IMAGE,
-                DetectorCapability.GENERATOR_FINGERPRINT}
+        return {
+            DetectorCapability.VIDEO_FRAMES,
+            DetectorCapability.SINGLE_IMAGE,
+            DetectorCapability.GENERATOR_FINGERPRINT,
+        }
 
     async def load_model(self) -> None:
         try:
             import torch
             from transformers import CLIPModel, CLIPProcessor
+
             model_name = "openai/clip-vit-large-patch14"
             self._processor = CLIPProcessor.from_pretrained(model_name)
             self.model = CLIPModel.from_pretrained(model_name)
@@ -72,6 +76,7 @@ class CLIPDetector(BaseDetector):
 
     def _precompute_text_features(self) -> None:
         import torch
+
         with torch.no_grad():
             for prompts, attr in [(AUTHENTIC_PROMPTS, "_text_auth"), (FAKE_PROMPTS, "_text_fake")]:
                 inputs = self._processor(text=prompts, return_tensors="pt", padding=True)
@@ -89,16 +94,28 @@ class CLIPDetector(BaseDetector):
     async def _run_detection(self, inp: DetectorInput) -> DetectorResult:
         frames = inp.frames or ([inp.image] if inp.image is not None else [])
         if not frames:
-            return DetectorResult(detector_name=self.name, detector_type=self.detector_type,
-                                  score=0.5, confidence=0.0, method="clip_skip",
-                                  status=DetectorStatus.SKIPPED)
+            return DetectorResult(
+                detector_name=self.name,
+                detector_type=self.detector_type,
+                score=0.5,
+                confidence=0.0,
+                method="clip_skip",
+                status=DetectorStatus.SKIPPED,
+            )
         if self.model is None:
-            return DetectorResult(detector_name=self.name, detector_type=self.detector_type,
-                                  score=0.5, confidence=0.1, method="clip_stub",
-                                  status=DetectorStatus.PASS, details={"mode": "stub"})
+            return DetectorResult(
+                detector_name=self.name,
+                detector_type=self.detector_type,
+                score=0.5,
+                confidence=0.1,
+                method="clip_stub",
+                status=DetectorStatus.PASS,
+                details={"mode": "stub"},
+            )
         try:
             import torch
             from PIL import Image
+
             scores = []
             for frame in frames[:8]:
                 pil_img = Image.fromarray(frame)
@@ -114,16 +131,34 @@ class CLIPDetector(BaseDetector):
             avg = float(np.mean(scores))
             std = float(np.std(scores))
             return DetectorResult(
-                detector_name=self.name, detector_type=self.detector_type,
-                score=avg, confidence=max(0.2, min(0.95, 1.0 - std * 3)),
-                method="clip_zero_shot_l2", status=DetectorStatus.PASS,
-                details={"n_frames": len(scores), "std": round(std, 4),
-                         "embedding_dim": 768, "fine_tuning": "LayerNorm-only (0.03%)"})
+                detector_name=self.name,
+                detector_type=self.detector_type,
+                score=avg,
+                confidence=max(0.2, min(0.95, 1.0 - std * 3)),
+                method="clip_zero_shot_l2",
+                status=DetectorStatus.PASS,
+                details={
+                    "n_frames": len(scores),
+                    "std": round(std, 4),
+                    "embedding_dim": 768,
+                    "fine_tuning": "LayerNorm-only (0.03%)",
+                },
+            )
         except Exception as exc:
-            return DetectorResult(detector_name=self.name, detector_type=self.detector_type,
-                                  score=0.5, confidence=0.0, method="clip_error",
-                                  status=DetectorStatus.ERROR, details={"error": str(exc)})
+            return DetectorResult(
+                detector_name=self.name,
+                detector_type=self.detector_type,
+                score=0.5,
+                confidence=0.0,
+                method="clip_error",
+                status=DetectorStatus.ERROR,
+                details={"error": str(exc)},
+            )
 
     def get_model_info(self) -> dict[str, Any]:
-        return {"name": "CLIP ViT-L/14 Forensic", "params": "428M (0.03% trainable)",
-                "embedding": "L2-normalized hyperspherical manifold", "input_size": "224x224"}
+        return {
+            "name": "CLIP ViT-L/14 Forensic",
+            "params": "428M (0.03% trainable)",
+            "embedding": "L2-normalized hyperspherical manifold",
+            "input_size": "224x224",
+        }

@@ -83,16 +83,15 @@ class MinorityReport:
 
         head_name = HEAD_NAMES[dissent_idx] if dissent_idx < len(HEAD_NAMES) else f"head_{dissent_idx}"
 
-        alert_text = self._generate_alert(
-            head_name, minority_score, majority_score, magnitude
-        )
-        recommendation = self._generate_recommendation(
-            minority_score, majority_score, magnitude
-        )
+        alert_text = self._generate_alert(head_name, minority_score, majority_score, magnitude)
+        recommendation = self._generate_recommendation(minority_score, majority_score, magnitude)
 
         logger.warning(
             "Minority report: %s dissents (score=%.3f vs majority=%.3f, magnitude=%.3f)",
-            head_name, minority_score, majority_score, magnitude,
+            head_name,
+            minority_score,
+            majority_score,
+            magnitude,
         )
 
         return MinorityReportResult(
@@ -118,7 +117,7 @@ class MinorityReport:
         max_idx = 0
 
         for i in range(n):
-            others = np.concatenate([verdicts[:i], verdicts[i + 1:]])
+            others = np.concatenate([verdicts[:i], verdicts[i + 1 :]])
             dist = abs(float(verdicts[i]) - float(np.median(others)))
             if dist > max_dist:
                 max_dist = dist

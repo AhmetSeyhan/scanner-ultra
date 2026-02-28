@@ -62,11 +62,7 @@ class AnomalyScorer:
         physics_val = 1.0 - physics_result.physics_score
         bio_val = 1.0 - bio_result.bio_consistency
 
-        anomaly = (
-            self.WEIGHTS["ood"] * ood_val
-            + self.WEIGHTS["physics"] * physics_val
-            + self.WEIGHTS["bio"] * bio_val
-        )
+        anomaly = self.WEIGHTS["ood"] * ood_val + self.WEIGHTS["physics"] * physics_val + self.WEIGHTS["bio"] * bio_val
         anomaly = max(0.0, min(1.0, anomaly))
 
         alert_level = self._to_alert(anomaly)
@@ -74,7 +70,11 @@ class AnomalyScorer:
         if alert_level in ("high", "critical"):
             logger.warning(
                 "Sentinel alert=%s: anomaly=%.3f (ood=%.3f, physics=%.3f, bio=%.3f)",
-                alert_level, anomaly, ood_val, physics_val, bio_val,
+                alert_level,
+                anomaly,
+                ood_val,
+                physics_val,
+                bio_val,
             )
 
         return SentinelResult(
@@ -100,21 +100,15 @@ class AnomalyScorer:
         factors: list[str] = []
 
         if result.is_novel_type:
-            factors.append(
-                f"Content appears to be a novel/unseen type (OOD score: {result.ood_score:.2f})"
-            )
+            factors.append(f"Content appears to be a novel/unseen type (OOD score: {result.ood_score:.2f})")
 
         if result.physics_score < 0.6:
-            factors.append(
-                f"Physical inconsistencies detected (score: {result.physics_score:.2f})"
-            )
+            factors.append(f"Physical inconsistencies detected (score: {result.physics_score:.2f})")
             if result.physics_anomalies:
                 factors.extend(f"  - {a}" for a in result.physics_anomalies)
 
         if result.bio_consistency < 0.6:
-            factors.append(
-                f"Biological signal inconsistencies (score: {result.bio_consistency:.2f})"
-            )
+            factors.append(f"Biological signal inconsistencies (score: {result.bio_consistency:.2f})")
 
         if not factors:
             factors.append("No significant anomalies detected by sentinel analysis.")

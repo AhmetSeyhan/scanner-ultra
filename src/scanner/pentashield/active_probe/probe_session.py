@@ -72,11 +72,13 @@ class ProbeSession:
             motion_result = self.motion.evaluate(frames)
             latency_result = self.latency.analyze(frames, fps, timestamps)
 
-            challenge_results.extend([
-                {"challenge": "light", "result": light_result.__dict__},
-                {"challenge": "motion", "result": motion_result.__dict__},
-                {"challenge": "latency", "result": latency_result.__dict__},
-            ])
+            challenge_results.extend(
+                [
+                    {"challenge": "light", "result": light_result.__dict__},
+                    {"challenge": "motion", "result": motion_result.__dict__},
+                    {"challenge": "latency", "result": latency_result.__dict__},
+                ]
+            )
             challenges_run = 3
 
         elif media_type == MediaType.IMAGE:
@@ -103,9 +105,7 @@ class ProbeSession:
         )
 
     @staticmethod
-    def _evaluate_liveness(
-        challenge_results: list[dict[str, Any]], media_type: MediaType
-    ) -> tuple[float, str]:
+    def _evaluate_liveness(challenge_results: list[dict[str, Any]], media_type: MediaType) -> tuple[float, str]:
         """Evaluate liveness from challenge results.
 
         Args:

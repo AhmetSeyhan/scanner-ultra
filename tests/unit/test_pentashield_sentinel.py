@@ -46,10 +46,7 @@ class TestOODDetector:
     def test_novel_type_flag(self):
         """Extremely high OOD score → is_novel_type flag."""
         # Force high entropy + all scores at 0.5 (maximum uncertainty)
-        results = {
-            f"det{i}": {"score": 0.48 + np.random.uniform(-0.02, 0.02)}
-            for i in range(10)
-        }
+        results = {f"det{i}": {"score": 0.48 + np.random.uniform(-0.02, 0.02)} for i in range(10)}
         result = self.ood.detect(results)
         # Even if not flagged as novel, the variance check should fire
         assert result.score_variance >= 0.0
@@ -115,8 +112,8 @@ class TestPhysicsVerifier:
         frame = np.full((128, 128, 3), 128, dtype=np.uint8)
         # Make center (face) warm, corners (bg) cool
         frame[32:96, 32:96, 0] = 200  # Red (warm face)
-        frame[32:96, 32:96, 2] = 80   # Less blue in face
-        frame[:20, :20, 2] = 200      # Blue corners (cool bg)
+        frame[32:96, 32:96, 2] = 80  # Less blue in face
+        frame[:20, :20, 2] = 200  # Blue corners (cool bg)
         frame[:20, 108:, 2] = 200
         result = self.verifier.verify([frame])
         assert "color_temperature" in result.check_scores

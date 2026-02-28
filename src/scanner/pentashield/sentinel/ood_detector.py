@@ -95,7 +95,10 @@ class OODDetector:
         if is_novel:
             logger.warning(
                 "Novel input type detected: OOD score=%.3f (energy=%.3f, entropy=%.3f, var=%.3f)",
-                ood_score, energy, entropy, variance,
+                ood_score,
+                energy,
+                entropy,
+                variance,
             )
 
         return OODResult(
@@ -110,11 +113,7 @@ class OODDetector:
     @staticmethod
     def _extract_scores(results: dict[str, dict]) -> list[float]:
         """Extract raw scores from detector results."""
-        return [
-            float(data["score"])
-            for data in results.values()
-            if "score" in data
-        ]
+        return [float(data["score"]) for data in results.values() if "score" in data]
 
     def _energy_score(self, scores: list[float]) -> float:
         """Energy-based OOD score.
@@ -132,9 +131,7 @@ class OODDetector:
         arr = np.array(scores)
         # Treat scores as pseudo-logits, scale to [-2, 2] range
         logits = (arr - 0.5) * 4.0
-        energy = -self.temperature * np.log(
-            np.sum(np.exp(logits / self.temperature)) + 1e-8
-        )
+        energy = -self.temperature * np.log(np.sum(np.exp(logits / self.temperature)) + 1e-8)
         # Normalize: high energy → high OOD
         # Empirical range: energy in [-10, 0] → map to [0, 1]
         normalized = 1.0 / (1.0 + np.exp(-0.5 * (energy + 5.0)))
@@ -237,17 +234,8 @@ class OODDetector:
         """Combine OOD sub-scores into final score."""
         if feat_dist is not None:
             # With feature distance: weight it heavily
-            combined = (
-                0.25 * energy
-                + 0.25 * entropy
-                + 0.15 * variance
-                + 0.35 * feat_dist
-            )
+            combined = 0.25 * energy + 0.25 * entropy + 0.15 * variance + 0.35 * feat_dist
         else:
             # Without feature distance: rely on score-based heuristics
-            combined = (
-                0.35 * energy
-                + 0.40 * entropy
-                + 0.25 * variance
-            )
+            combined = 0.35 * energy + 0.40 * entropy + 0.25 * variance
         return float(np.clip(combined, 0.0, 1.0))

@@ -35,24 +35,41 @@ class PPGBioDetector(BaseDetector):
 
     async def _run_detection(self, inp: DetectorInput) -> DetectorResult:
         if not inp.frames or len(inp.frames) < 8:
-            return DetectorResult(detector_name=self.name, detector_type=self.detector_type,
-                                  score=0.5, confidence=0.0, method="ppg_skip",
-                                  status=DetectorStatus.SKIPPED)
+            return DetectorResult(
+                detector_name=self.name,
+                detector_type=self.detector_type,
+                score=0.5,
+                confidence=0.0,
+                method="ppg_skip",
+                status=DetectorStatus.SKIPPED,
+            )
         ppg = self._extract_ppg(inp.frames)
         if ppg is None or len(ppg) < 8:
-            return DetectorResult(detector_name=self.name, detector_type=self.detector_type,
-                                  score=0.5, confidence=0.1, method="ppg_insufficient",
-                                  status=DetectorStatus.WARN)
+            return DetectorResult(
+                detector_name=self.name,
+                detector_type=self.detector_type,
+                score=0.5,
+                confidence=0.1,
+                method="ppg_insufficient",
+                status=DetectorStatus.WARN,
+            )
         periodicity = self._periodicity(ppg, inp.fps or 30.0)
         snr = self._snr(ppg)
         consistency = self._spatial_consistency(inp.frames)
         score = 0.4 * (1.0 - periodicity) + 0.3 * (1.0 - snr) + 0.3 * (1.0 - consistency)
         return DetectorResult(
-            detector_name=self.name, detector_type=self.detector_type,
-            score=score, confidence=min(0.8, 0.3 + 0.5 * len(inp.frames) / 32.0),
-            method="ppg_analysis", status=DetectorStatus.PASS,
-            details={"periodicity": round(periodicity, 4), "snr": round(snr, 4),
-                     "spatial_consistency": round(consistency, 4)})
+            detector_name=self.name,
+            detector_type=self.detector_type,
+            score=score,
+            confidence=min(0.8, 0.3 + 0.5 * len(inp.frames) / 32.0),
+            method="ppg_analysis",
+            status=DetectorStatus.PASS,
+            details={
+                "periodicity": round(periodicity, 4),
+                "snr": round(snr, 4),
+                "spatial_consistency": round(consistency, 4),
+            },
+        )
 
     @staticmethod
     def _extract_ppg(frames: list[np.ndarray]) -> np.ndarray | None:
@@ -91,8 +108,8 @@ class PPGBioDetector(BaseDetector):
             h, w = f.shape[:2]
             mid = w // 2
             if f.ndim == 3 and f.shape[2] >= 3:
-                left_s.append(float(f[h//4:3*h//4, w//4:mid, 1].mean()))
-                right_s.append(float(f[h//4:3*h//4, mid:3*w//4, 1].mean()))
+                left_s.append(float(f[h // 4 : 3 * h // 4, w // 4 : mid, 1].mean()))
+                right_s.append(float(f[h // 4 : 3 * h // 4, mid : 3 * w // 4, 1].mean()))
         if len(left_s) < 4:
             return 0.5
         c = np.corrcoef(left_s, right_s)[0, 1]

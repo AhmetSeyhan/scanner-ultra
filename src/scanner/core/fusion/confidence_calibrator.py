@@ -15,8 +15,7 @@ class ConfidenceCalibrator:
         self.temperature = temperature
         self._params: dict[str, dict[str, float]] = {}
 
-    def calibrate(self, score: float, confidence: float,
-                  detector_name: str) -> tuple[float, float]:
+    def calibrate(self, score: float, confidence: float, detector_name: str) -> tuple[float, float]:
         params = self._params.get(detector_name)
         if params:
             cal_score = self._sigmoid(params.get("a", 1.0) * score + params.get("b", 0.0))

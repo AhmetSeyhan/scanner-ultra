@@ -33,18 +33,30 @@ class AITextDetector(BaseDetector):
 
     async def _run_detection(self, inp: DetectorInput) -> DetectorResult:
         if not inp.text or len(inp.text.strip()) < 50:
-            return DetectorResult(detector_name=self.name, detector_type=self.detector_type,
-                                  score=0.5, confidence=0.0, method="aitext_skip",
-                                  status=DetectorStatus.SKIPPED)
+            return DetectorResult(
+                detector_name=self.name,
+                detector_type=self.detector_type,
+                score=0.5,
+                confidence=0.0,
+                method="aitext_skip",
+                status=DetectorStatus.SKIPPED,
+            )
         text = inp.text.strip()
         feat = self._features(text)
         score = self._score(feat)
         return DetectorResult(
-            detector_name=self.name, detector_type=self.detector_type,
-            score=score, confidence=min(0.7, 0.3 + len(text) / 5000),
-            method="statistical_analysis", status=DetectorStatus.PASS,
-            details={"word_count": feat["wc"], "vocab_richness": round(feat["ttr"], 4),
-                     "burstiness": round(feat["burst"], 4)})
+            detector_name=self.name,
+            detector_type=self.detector_type,
+            score=score,
+            confidence=min(0.7, 0.3 + len(text) / 5000),
+            method="statistical_analysis",
+            status=DetectorStatus.PASS,
+            details={
+                "word_count": feat["wc"],
+                "vocab_richness": round(feat["ttr"], 4),
+                "burstiness": round(feat["burst"], 4),
+            },
+        )
 
     @staticmethod
     def _features(text: str) -> dict[str, float]:
@@ -57,9 +69,13 @@ class AITextDetector(BaseDetector):
         freq = Counter(w.lower() for w in words)
         fv = list(freq.values())
         burst = (np.std(fv) - np.mean(fv)) / (np.std(fv) + np.mean(fv) + 1e-8) if len(fv) > 1 else 0.0
-        return {"wc": wc, "ttr": ttr, "sent_std": float(np.std(sent_lens)),
-                "avg_wl": float(np.mean([len(w) for w in words])) if words else 0.0,
-                "burst": float(burst)}
+        return {
+            "wc": wc,
+            "ttr": ttr,
+            "sent_std": float(np.std(sent_lens)),
+            "avg_wl": float(np.mean([len(w) for w in words])) if words else 0.0,
+            "burst": float(burst),
+        }
 
     @staticmethod
     def _score(f: dict[str, float]) -> float:

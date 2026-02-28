@@ -56,9 +56,12 @@ class VideoProcessor:
         audio_waveform, audio_sr = self._extract_audio(tmp_path)
 
         return VideoData(
-            frames=frames, fps=meta.fps,
-            audio_waveform=audio_waveform, audio_sr=audio_sr,
-            meta=meta, temp_path=tmp_path,
+            frames=frames,
+            fps=meta.fps,
+            audio_waveform=audio_waveform,
+            audio_sr=audio_sr,
+            meta=meta,
+            temp_path=tmp_path,
         )
 
     def _extract_meta(self, path: str) -> VideoMeta:
@@ -105,9 +108,10 @@ class VideoProcessor:
         sr = 16000
         try:
             result = subprocess.run(
-                ["ffmpeg", "-i", path, "-vn", "-acodec", "pcm_s16le",
-                 "-ar", str(sr), "-ac", "1", "-f", "s16le", "-"],
-                capture_output=True, timeout=30, check=False,
+                ["ffmpeg", "-i", path, "-vn", "-acodec", "pcm_s16le", "-ar", str(sr), "-ac", "1", "-f", "s16le", "-"],
+                capture_output=True,
+                timeout=30,
+                check=False,
             )
             if result.returncode != 0 or not result.stdout:
                 return None, 0
@@ -121,9 +125,22 @@ class VideoProcessor:
     def _check_audio_stream(path: str) -> bool:
         try:
             result = subprocess.run(
-                ["ffprobe", "-v", "error", "-select_streams", "a",
-                 "-show_entries", "stream=codec_type", "-of", "csv=p=0", path],
-                capture_output=True, text=True, timeout=10, check=False,
+                [
+                    "ffprobe",
+                    "-v",
+                    "error",
+                    "-select_streams",
+                    "a",
+                    "-show_entries",
+                    "stream=codec_type",
+                    "-of",
+                    "csv=p=0",
+                    path,
+                ],
+                capture_output=True,
+                text=True,
+                timeout=10,
+                check=False,
             )
             return "audio" in result.stdout
         except (FileNotFoundError, subprocess.TimeoutExpired):

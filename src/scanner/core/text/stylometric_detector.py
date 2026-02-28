@@ -13,13 +13,69 @@ from scanner.models.enums import DetectorCapability, DetectorStatus, DetectorTyp
 logger = logging.getLogger(__name__)
 
 FUNCTION_WORDS = {
-    "the", "a", "an", "is", "are", "was", "were", "be", "been", "being",
-    "have", "has", "had", "do", "does", "did", "will", "would", "could",
-    "should", "may", "might", "can", "to", "of", "in", "for", "on", "with",
-    "at", "by", "from", "as", "into", "through", "during", "before", "after",
-    "but", "and", "or", "nor", "not", "so", "yet", "both", "either",
-    "that", "which", "who", "this", "these", "those", "i", "you", "he",
-    "she", "it", "we", "they", "me", "him", "her",
+    "the",
+    "a",
+    "an",
+    "is",
+    "are",
+    "was",
+    "were",
+    "be",
+    "been",
+    "being",
+    "have",
+    "has",
+    "had",
+    "do",
+    "does",
+    "did",
+    "will",
+    "would",
+    "could",
+    "should",
+    "may",
+    "might",
+    "can",
+    "to",
+    "of",
+    "in",
+    "for",
+    "on",
+    "with",
+    "at",
+    "by",
+    "from",
+    "as",
+    "into",
+    "through",
+    "during",
+    "before",
+    "after",
+    "but",
+    "and",
+    "or",
+    "nor",
+    "not",
+    "so",
+    "yet",
+    "both",
+    "either",
+    "that",
+    "which",
+    "who",
+    "this",
+    "these",
+    "those",
+    "i",
+    "you",
+    "he",
+    "she",
+    "it",
+    "we",
+    "they",
+    "me",
+    "him",
+    "her",
 }
 
 
@@ -41,17 +97,26 @@ class StylometricDetector(BaseDetector):
 
     async def _run_detection(self, inp: DetectorInput) -> DetectorResult:
         if not inp.text or len(inp.text.strip()) < 100:
-            return DetectorResult(detector_name=self.name, detector_type=self.detector_type,
-                                  score=0.5, confidence=0.0, method="stylo_skip",
-                                  status=DetectorStatus.SKIPPED)
+            return DetectorResult(
+                detector_name=self.name,
+                detector_type=self.detector_type,
+                score=0.5,
+                confidence=0.0,
+                method="stylo_skip",
+                status=DetectorStatus.SKIPPED,
+            )
         text = inp.text.strip()
         feat = self._analyze(text)
         score = self._score(feat)
         return DetectorResult(
-            detector_name=self.name, detector_type=self.detector_type,
-            score=score, confidence=min(0.65, 0.2 + len(text) / 3000),
-            method="stylometric_analysis", status=DetectorStatus.PASS,
-            details={k: round(v, 4) for k, v in feat.items()})
+            detector_name=self.name,
+            detector_type=self.detector_type,
+            score=score,
+            confidence=min(0.65, 0.2 + len(text) / 3000),
+            method="stylometric_analysis",
+            status=DetectorStatus.PASS,
+            details={k: round(v, 4) for k, v in feat.items()},
+        )
 
     @staticmethod
     def _analyze(text: str) -> dict[str, float]:
@@ -65,9 +130,13 @@ class StylometricDetector(BaseDetector):
         cj = sum(1 for w in words if w.strip(".,!?;:") in conjs)
         prons = {"i", "you", "he", "she", "it", "we", "they", "me", "him", "her", "my", "your", "his"}
         pr = sum(1 for w in words if w.strip(".,!?;:") in prons)
-        return {"fw_ratio": fw / wc, "punct_density": punct / wc,
-                "para_std": float(np.std(pl)) if len(pl) > 1 else 0.0,
-                "conj_rate": cj / wc, "pronoun_ratio": pr / wc}
+        return {
+            "fw_ratio": fw / wc,
+            "punct_density": punct / wc,
+            "para_std": float(np.std(pl)) if len(pl) > 1 else 0.0,
+            "conj_rate": cj / wc,
+            "pronoun_ratio": pr / wc,
+        }
 
     @staticmethod
     def _score(f: dict[str, float]) -> float:

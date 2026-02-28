@@ -88,9 +88,7 @@ class AdversarialAuditor:
         indicators.append(self._check_perturbation(perturbation_magnitude))
 
         # Indicator 2: Result divergence (original vs purified)
-        indicators.append(
-            self._check_divergence(original_results, purified_results)
-        )
+        indicators.append(self._check_divergence(original_results, purified_results))
 
         # Indicator 3: Confidence anomalies
         indicators.append(self._check_confidence_anomaly(original_results))
@@ -107,7 +105,9 @@ class AdversarialAuditor:
         if is_adversarial:
             logger.warning(
                 "Adversarial attack detected: %d/%d indicators triggered, robustness=%.3f",
-                triggered, len(indicators), robustness,
+                triggered,
+                len(indicators),
+                robustness,
             )
 
         return AuditResult(
@@ -259,10 +259,7 @@ class AdversarialAuditor:
         severities = [i.severity for i in indicators]
         # Robustness is the complement of the weighted severity
         # Triggered indicators contribute more
-        weighted = sum(
-            s * (2.0 if i.triggered else 0.5)
-            for i, s in zip(indicators, severities)
-        )
+        weighted = sum(s * (2.0 if i.triggered else 0.5) for i, s in zip(indicators, severities))
         max_possible = len(indicators) * 2.0
         return max(0.0, 1.0 - weighted / max_possible)
 

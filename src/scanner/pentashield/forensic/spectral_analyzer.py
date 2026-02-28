@@ -254,9 +254,7 @@ class SpectralAnalyzer:
         peaks = np.where(autocorr[2:] > threshold)[0]
         return len(peaks) >= 2  # At least 2 peaks → periodic
 
-    def _match_profiles(
-        self, fingerprints: list[SpectralFingerprint]
-    ) -> list[dict[str, Any]]:
+    def _match_profiles(self, fingerprints: list[SpectralFingerprint]) -> list[dict[str, Any]]:
         """Match extracted fingerprints against known generator profiles.
 
         Args:
@@ -275,15 +273,11 @@ class SpectralAnalyzer:
             "high": float(np.mean([fp.band_energies["high"] for fp in fingerprints])),
         }
         avg_centroid = float(np.mean([fp.centroid for fp in fingerprints]))
-        has_peaks_majority = sum(fp.has_periodic_peaks for fp in fingerprints) >= len(
-            fingerprints
-        ) / 2
+        has_peaks_majority = sum(fp.has_periodic_peaks for fp in fingerprints) >= len(fingerprints) / 2
 
         matches = []
         for gen_name, profile in self.profile_db.items():
-            score = self._profile_similarity(
-                avg_bands, avg_centroid, has_peaks_majority, profile
-            )
+            score = self._profile_similarity(avg_bands, avg_centroid, has_peaks_majority, profile)
             matches.append({"name": gen_name, "score": round(score, 4)})
 
         # Sort by score descending

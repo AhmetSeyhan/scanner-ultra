@@ -27,12 +27,12 @@ class CrossModalAttention:
     ) -> dict[str, Any]:
         modality_scores: dict[str, dict[str, Any]] = {}
 
-        for name, results in [("visual", visual_results), ("audio", audio_results),
-                               ("text", text_results)]:
+        for name, results in [("visual", visual_results), ("audio", audio_results), ("text", text_results)]:
             if results:
                 # Stub, skip ve hata sonuçlarını fusion'dan dışla
                 active = {
-                    k: r for k, r in results.items()
+                    k: r
+                    for k, r in results.items()
                     if "stub" not in r.get("method", "")
                     and r.get("status") not in ("skipped", "error", "SKIPPED", "ERROR")
                     and r.get("confidence", 0.0) >= 0.15
@@ -79,7 +79,7 @@ class CrossModalAttention:
         mods = list(ms.keys())
         weights = {m: 1.0 for m in mods}
         for i, m1 in enumerate(mods):
-            for m2 in mods[i + 1:]:
+            for m2 in mods[i + 1 :]:
                 agr = 1.0 - abs(ms[m1]["score"] - ms[m2]["score"])
                 prior = ATTENTION_PRIORS.get((m1, m2), ATTENTION_PRIORS.get((m2, m1), 0.5))
                 boost = agr * prior

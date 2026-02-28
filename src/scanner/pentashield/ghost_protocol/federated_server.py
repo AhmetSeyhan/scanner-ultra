@@ -13,7 +13,6 @@ References:
 from __future__ import annotations
 
 import logging
-from collections import defaultdict
 from typing import Any
 
 import torch
@@ -59,10 +58,7 @@ class FederatedServer:
         self.client_weights: dict[str, float] = {}  # Sample weights for weighted averaging
         self.round_history: list[dict[str, Any]] = []
 
-        logger.info(
-            f"FederatedServer initialized "
-            f"(strategy={aggregation_strategy}, min_clients={min_clients})"
-        )
+        logger.info(f"FederatedServer initialized (strategy={aggregation_strategy}, min_clients={min_clients})")
 
     def get_global_model(self) -> dict[str, torch.Tensor]:
         """Get current global model state.
@@ -102,16 +98,10 @@ class FederatedServer:
             True if aggregation successful, False if insufficient clients
         """
         if len(self.client_updates) < self.min_clients:
-            logger.warning(
-                f"Insufficient clients for aggregation "
-                f"({len(self.client_updates)}/{self.min_clients})"
-            )
+            logger.warning(f"Insufficient clients for aggregation ({len(self.client_updates)}/{self.min_clients})")
             return False
 
-        logger.info(
-            f"Aggregating updates from {len(self.client_updates)} clients "
-            f"(round {self.global_round + 1})"
-        )
+        logger.info(f"Aggregating updates from {len(self.client_updates)} clients (round {self.global_round + 1})")
 
         if self.aggregation_strategy == "fedavg":
             self._aggregate_fedavg()
@@ -252,10 +242,7 @@ class FederatedServer:
         accuracy = 100.0 * correct / total
         avg_loss = loss / len(test_data)
 
-        logger.info(
-            f"Global model evaluation (round {self.global_round}) - "
-            f"Loss: {avg_loss:.4f}, Acc: {accuracy:.2f}%"
-        )
+        logger.info(f"Global model evaluation (round {self.global_round}) - Loss: {avg_loss:.4f}, Acc: {accuracy:.2f}%")
 
         return {
             "accuracy": round(accuracy, 2),

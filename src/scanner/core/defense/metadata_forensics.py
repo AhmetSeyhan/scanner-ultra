@@ -8,17 +8,28 @@ from typing import Any
 logger = logging.getLogger(__name__)
 
 AI_SOFTWARE = [
-    "stable diffusion", "dall-e", "midjourney", "comfyui", "automatic1111",
-    "novelai", "deepfacelab", "faceswap", "roop", "simswap",
+    "stable diffusion",
+    "dall-e",
+    "midjourney",
+    "comfyui",
+    "automatic1111",
+    "novelai",
+    "deepfacelab",
+    "faceswap",
+    "roop",
+    "simswap",
 ]
 
 
 class MetadataForensics:
     async def analyze(self, content: bytes, filename: str) -> dict[str, Any]:
         results: dict[str, Any] = {
-            "file_size": len(content), "filename": filename,
-            "format_valid": True, "ai_software_detected": False,
-            "ai_software_name": None, "metadata_inconsistencies": [],
+            "file_size": len(content),
+            "filename": filename,
+            "format_valid": True,
+            "ai_software_detected": False,
+            "ai_software_name": None,
+            "metadata_inconsistencies": [],
             "forensic_score": 0.5,
         }
         results["format_valid"] = self._validate_format(content, filename)
@@ -35,8 +46,11 @@ class MetadataForensics:
             return False
         ext = filename.rsplit(".", 1)[-1].lower() if "." in filename else ""
         magic_map = {
-            "jpg": [b"\xff\xd8\xff"], "jpeg": [b"\xff\xd8\xff"],
-            "png": [b"\x89PNG"], "gif": [b"GIF8"], "webp": [b"RIFF"],
+            "jpg": [b"\xff\xd8\xff"],
+            "jpeg": [b"\xff\xd8\xff"],
+            "png": [b"\x89PNG"],
+            "gif": [b"GIF8"],
+            "webp": [b"RIFF"],
             "mp4": [b"\x00\x00\x00\x18", b"\x00\x00\x00\x1c", b"\x00\x00\x00\x20"],
         }
         expected = magic_map.get(ext, [])

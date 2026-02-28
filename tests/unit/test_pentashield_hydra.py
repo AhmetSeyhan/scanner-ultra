@@ -172,9 +172,7 @@ class TestAdversarialAuditor:
             "clip_deepfake": {"score": 0.7, "confidence": 0.6},
             "frequency_analysis": {"score": 0.8, "confidence": 0.65},
         }
-        audit = self.auditor.audit(
-            original, purified_results=purified, perturbation_magnitude=0.05
-        )
+        audit = self.auditor.audit(original, purified_results=purified, perturbation_magnitude=0.05)
         assert audit.adversarial_detected
         assert audit.robustness_score < 0.5
 
@@ -187,9 +185,7 @@ class TestAdversarialAuditor:
         }
         audit = self.auditor.audit(results, perturbation_magnitude=0.0)
         # Should trigger confidence anomaly indicator
-        conf_indicator = next(
-            (i for i in audit.indicators if i.name == "confidence_anomaly"), None
-        )
+        conf_indicator = next((i for i in audit.indicators if i.name == "confidence_anomaly"), None)
         assert conf_indicator is not None
         assert conf_indicator.triggered
 
@@ -202,8 +198,6 @@ class TestAdversarialAuditor:
             "efficientnet_b0": {"score": 0.85},
         }
         audit = self.auditor.audit(results, perturbation_magnitude=0.0)
-        cross_indicator = next(
-            (i for i in audit.indicators if i.name == "cross_detector_inconsistency"), None
-        )
+        cross_indicator = next((i for i in audit.indicators if i.name == "cross_detector_inconsistency"), None)
         assert cross_indicator is not None
         assert cross_indicator.triggered

@@ -25,11 +25,13 @@ def clean_detector_results():
         "frequency_analysis": {"score": 0.15, "confidence": 0.7, "details": {}},
         "efficientnet_b0": {"score": 0.12, "confidence": 0.8, "details": {}},
         "ppg_biosignal": {
-            "score": 0.2, "confidence": 0.6,
+            "score": 0.2,
+            "confidence": 0.6,
             "details": {"periodicity": 0.6, "snr": 0.4, "spatial_consistency": 0.8},
         },
         "gaze_analysis": {
-            "score": 0.15, "confidence": 0.7,
+            "score": 0.15,
+            "confidence": 0.7,
             "details": {"consistency": 0.8},
         },
     }

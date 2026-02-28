@@ -34,8 +34,7 @@ class ImageData:
 
 
 class ImageProcessor:
-    def __init__(self, face_size: tuple[int, int] = (224, 224),
-                 min_confidence: float = 0.5) -> None:
+    def __init__(self, face_size: tuple[int, int] = (224, 224), min_confidence: float = 0.5) -> None:
         self.face_size = face_size
         self.min_confidence = min_confidence
         self._face_detector = None
@@ -58,9 +57,12 @@ class ImageProcessor:
                 face.aligned_face = cv2.resize(crop, self.face_size)
         resized = cv2.resize(image, self.face_size)
         return ImageData(
-            original=image, faces=faces, resized=resized,
+            original=image,
+            faces=faces,
+            resized=resized,
             normalized=resized.astype(np.float32) / 255.0,
-            width=w, height=h,
+            width=w,
+            height=h,
         )
 
     def process_frame(self, frame: np.ndarray) -> ImageData:
@@ -74,9 +76,12 @@ class ImageProcessor:
                 face.aligned_face = cv2.resize(crop, self.face_size)
         resized = cv2.resize(frame, self.face_size)
         return ImageData(
-            original=frame, faces=faces, resized=resized,
+            original=frame,
+            faces=faces,
+            resized=resized,
             normalized=resized.astype(np.float32) / 255.0,
-            width=w, height=h,
+            width=w,
+            height=h,
         )
 
     def _detect_faces(self, image: np.ndarray) -> list[FaceRegion]:
@@ -87,12 +92,12 @@ class ImageProcessor:
 
     def _detect_faces_mediapipe(self, image: np.ndarray) -> list[FaceRegion]:
         import mediapipe as mp
+
         if self._face_detector is None:
-            base_options = mp.tasks.BaseOptions(
-                model_asset_path="blaze_face_short_range.tflite")
+            base_options = mp.tasks.BaseOptions(model_asset_path="blaze_face_short_range.tflite")
             options = mp.tasks.vision.FaceDetectorOptions(
-                base_options=base_options,
-                min_detection_confidence=self.min_confidence)
+                base_options=base_options, min_detection_confidence=self.min_confidence
+            )
             self._face_detector = mp.tasks.vision.FaceDetector.create_from_options(options)
         mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=image)
         result = self._face_detector.detect(mp_image)
@@ -102,7 +107,8 @@ class ImageProcessor:
             bb = detection.bounding_box
             face = FaceRegion(
                 bbox=(bb.origin_x, bb.origin_y, bb.width, bb.height),
-                confidence=detection.categories[0].score if detection.categories else 0.0)
+                confidence=detection.categories[0].score if detection.categories else 0.0,
+            )
             if detection.keypoints:
                 face.landmarks = [(kp.x * w, kp.y * h) for kp in detection.keypoints]
             faces.append(face)
@@ -111,8 +117,6 @@ class ImageProcessor:
     @staticmethod
     def _detect_faces_opencv(image: np.ndarray) -> list[FaceRegion]:
         gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
-        cascade = cv2.CascadeClassifier(
-            cv2.data.haarcascades + "haarcascade_frontalface_default.xml")
+        cascade = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_frontalface_default.xml")
         detections = cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5)
-        return [FaceRegion(bbox=(int(x), int(y), int(w), int(h)), confidence=0.8)
-                for (x, y, w, h) in detections]
+        return [FaceRegion(bbox=(int(x), int(y), int(w), int(h)), confidence=0.8) for (x, y, w, h) in detections]

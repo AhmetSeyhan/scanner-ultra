@@ -152,5 +152,5 @@ class InputPurifier:
         orig_f = original.astype(np.float32) / 255.0
         pur_f = purified.astype(np.float32) / 255.0
         diff = orig_f - pur_f
-        l2 = float(np.sqrt(np.mean(diff ** 2)))
+        l2 = float(np.sqrt(np.mean(diff**2)))
         return l2

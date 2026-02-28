@@ -1,7 +1,6 @@
 """Tests for config module."""
 
 
-
 def test_settings_defaults():
     from scanner.config import Settings
 

@@ -70,14 +70,10 @@ class LightChallenge:
             )
 
         # Step 1: Extract eye reflections (catchlights)
-        reflection_score = self._measure_reflection_changes(
-            frame_sequence, color_sequence
-        )
+        reflection_score = self._measure_reflection_changes(frame_sequence, color_sequence)
 
         # Step 2: Measure face brightness correlation with screen colors
-        brightness_corr = self._measure_brightness_correlation(
-            frame_sequence, color_sequence
-        )
+        brightness_corr = self._measure_brightness_correlation(frame_sequence, color_sequence)
 
         # Step 3: Check synchronization (timing)
         sync_score = self._measure_synchronization(frame_sequence, color_sequence)
@@ -92,9 +88,7 @@ class LightChallenge:
             anomalies.append("poor_synchronization")
 
         # Overall score (weighted average)
-        overall = (
-            0.4 * reflection_score + 0.4 * brightness_corr + 0.2 * sync_score
-        )
+        overall = 0.4 * reflection_score + 0.4 * brightness_corr + 0.2 * sync_score
 
         passed = overall >= 0.6 and len(anomalies) == 0
 
@@ -131,9 +125,7 @@ class LightChallenge:
             h, w = gray.shape
 
             # Eye region (approximate - top-center 20%)
-            eye_region = gray[
-                int(h * 0.2) : int(h * 0.5), int(w * 0.3) : int(w * 0.7)
-            ]
+            eye_region = gray[int(h * 0.2) : int(h * 0.5), int(w * 0.3) : int(w * 0.7)]
 
             # Detect bright spots (catchlights / specular reflections)
             _, bright_mask = cv2.threshold(eye_region, 200, 255, cv2.THRESH_BINARY)
@@ -182,9 +174,7 @@ class LightChallenge:
             h, w = gray.shape
 
             # Face region (center crop)
-            face_region = gray[
-                int(h * 0.2) : int(h * 0.8), int(w * 0.25) : int(w * 0.75)
-            ]
+            face_region = gray[int(h * 0.2) : int(h * 0.8), int(w * 0.25) : int(w * 0.75)]
             mean_brightness = face_region.mean() / 255.0
             face_brightness.append(mean_brightness)
 

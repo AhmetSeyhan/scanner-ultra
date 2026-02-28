@@ -49,7 +49,7 @@ class BioConsistency:
     # Thresholds for individual checks
     PERIODICITY_MIN = 0.15  # PPG should have *some* periodicity
     PERIODICITY_MAX = 0.95  # Perfect periodicity is suspicious
-    SNR_MIN = 0.05          # Some SNR expected in real PPG
+    SNR_MIN = 0.05  # Some SNR expected in real PPG
     SPATIAL_CONSISTENCY_MIN = 0.3  # Left/right PPG correlation
 
     def check(

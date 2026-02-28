@@ -88,9 +88,7 @@ class PhysicsVerifier:
             anomalies=anomalies,
         )
 
-    def _lighting(
-        self, frames: list[np.ndarray]
-    ) -> tuple[str, float, str | None]:
+    def _lighting(self, frames: list[np.ndarray]) -> tuple[str, float, str | None]:
         """Check lighting direction consistency across frames.
 
         Compares brightness ratio of left vs right face halves.
@@ -122,9 +120,7 @@ class PhysicsVerifier:
 
         return ("lighting", score, anomaly)
 
-    def _shadow(
-        self, frames: list[np.ndarray]
-    ) -> tuple[str, float, str | None]:
+    def _shadow(self, frames: list[np.ndarray]) -> tuple[str, float, str | None]:
         """Check shadow direction consistency via gradient analysis.
 
         Computes dominant gradient direction (Sobel) in the nose region.
@@ -152,7 +148,7 @@ class PhysicsVerifier:
         angles_arr = np.array(angles)
         mean_sin = float(np.mean(np.sin(angles_arr)))
         mean_cos = float(np.mean(np.cos(angles_arr)))
-        r = np.sqrt(mean_sin ** 2 + mean_cos ** 2)
+        r = np.sqrt(mean_sin**2 + mean_cos**2)
         score = float(np.clip(r, 0.0, 1.0))
 
         anomaly = None
@@ -161,9 +157,7 @@ class PhysicsVerifier:
 
         return ("shadow", score, anomaly)
 
-    def _specular(
-        self, frames: list[np.ndarray]
-    ) -> tuple[str, float, str | None]:
+    def _specular(self, frames: list[np.ndarray]) -> tuple[str, float, str | None]:
         """Check corneal reflection (catchlight) symmetry.
 
         In real faces, both eyes reflect the same light source(s) in
@@ -213,9 +207,7 @@ class PhysicsVerifier:
 
         return ("specular", score, anomaly)
 
-    def _color_temperature(
-        self, frames: list[np.ndarray]
-    ) -> tuple[str, float, str | None]:
+    def _color_temperature(self, frames: list[np.ndarray]) -> tuple[str, float, str | None]:
         """Check face vs background color temperature consistency.
 
         Real images have consistent white balance. Composited faces may
@@ -235,10 +227,14 @@ class PhysicsVerifier:
             bg_tr = frame[: h // 6, 5 * w // 6 :]
             bg_bl = frame[5 * h // 6 :, : w // 6]
             bg_br = frame[5 * h // 6 :, 5 * w // 6 :]
-            bg = np.concatenate(
-                [r.reshape(-1, 3) for r in [bg_tl, bg_tr, bg_bl, bg_br] if r.size > 0],
-                axis=0,
-            ) if any(r.size > 0 for r in [bg_tl, bg_tr, bg_bl, bg_br]) else None
+            bg = (
+                np.concatenate(
+                    [r.reshape(-1, 3) for r in [bg_tl, bg_tr, bg_bl, bg_br] if r.size > 0],
+                    axis=0,
+                )
+                if any(r.size > 0 for r in [bg_tl, bg_tr, bg_bl, bg_br])
+                else None
+            )
 
             if bg is None or bg.shape[0] == 0 or face.size == 0:
                 continue
@@ -265,9 +261,7 @@ class PhysicsVerifier:
 
         return ("color_temperature", score, anomaly)
 
-    def _edge_gradient(
-        self, frames: list[np.ndarray]
-    ) -> tuple[str, float, str | None]:
+    def _edge_gradient(self, frames: list[np.ndarray]) -> tuple[str, float, str | None]:
         """Check face boundary sharpness for pasting artifacts.
 
         Composited faces often have abnormal edge sharpness at the paste
@@ -316,8 +310,7 @@ class PhysicsVerifier:
         if score < self.ANOMALY_THRESHOLD:
             direction = "sharper" if avg_ratio > 1.0 else "smoother"
             anomaly = (
-                f"Face boundary is {direction} than interior "
-                f"(ratio={avg_ratio:.3f}), possible compositing artifact"
+                f"Face boundary is {direction} than interior (ratio={avg_ratio:.3f}), possible compositing artifact"
             )
 
         return ("edge_gradient", score, anomaly)

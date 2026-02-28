@@ -46,9 +46,12 @@ class QualityAdapter:
         if sharp < 0.3:
             recs.append("Image is blurry")
         return QualityReport(
-            level=self._to_level(overall), resolution_score=res,
-            sharpness_score=sharp, noise_score=noise,
-            overall_score=overall, recommendations=recs,
+            level=self._to_level(overall),
+            resolution_score=res,
+            sharpness_score=sharp,
+            noise_score=noise,
+            overall_score=overall,
+            recommendations=recs,
         )
 
     def assess_frames(self, frames: list[np.ndarray]) -> QualityReport:
@@ -62,14 +65,18 @@ class QualityAdapter:
     def assess_audio(self, waveform: np.ndarray | None, sr: int) -> QualityReport:
         if waveform is None or len(waveform) == 0:
             return QualityReport(level=QualityLevel.VERY_LOW, overall_score=0.0)
-        rms = float(np.sqrt(np.mean(waveform ** 2)))
+        rms = float(np.sqrt(np.mean(waveform**2)))
         duration = len(waveform) / sr if sr > 0 else 0.0
         overall = 0.6 * min(1.0, rms / 0.1) + 0.4 * min(1.0, duration / 3.0)
         return QualityReport(level=self._to_level(overall), overall_score=overall)
 
     def get_confidence_weight(self, quality: QualityReport) -> float:
-        return {QualityLevel.HIGH: 1.0, QualityLevel.MEDIUM: 0.8,
-                QualityLevel.LOW: 0.5, QualityLevel.VERY_LOW: 0.3}.get(quality.level, 0.5)
+        return {
+            QualityLevel.HIGH: 1.0,
+            QualityLevel.MEDIUM: 0.8,
+            QualityLevel.LOW: 0.5,
+            QualityLevel.VERY_LOW: 0.3,
+        }.get(quality.level, 0.5)
 
     @staticmethod
     def _score_resolution(w: int, h: int) -> float:

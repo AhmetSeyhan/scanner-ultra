@@ -133,6 +133,7 @@ class BaseDetector(ABC):
         if device == "auto":
             try:
                 import torch
+
                 return "cuda" if torch.cuda.is_available() else "cpu"
             except ImportError:
                 return "cpu"
@@ -148,13 +149,11 @@ class BaseDetector(ABC):
 
     @property
     @abstractmethod
-    def detector_type(self) -> DetectorType:
-        ...
+    def detector_type(self) -> DetectorType: ...
 
     @property
     @abstractmethod
-    def capabilities(self) -> set[DetectorCapability]:
-        ...
+    def capabilities(self) -> set[DetectorCapability]: ...
 
     @property
     def version(self) -> str:

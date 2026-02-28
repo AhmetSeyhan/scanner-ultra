@@ -31,20 +31,28 @@ class VoiceCloneDetector(BaseDetector):
 
     async def _run_detection(self, inp: DetectorInput) -> DetectorResult:
         if inp.audio_waveform is None:
-            return DetectorResult(detector_name=self.name, detector_type=self.detector_type,
-                                  score=0.5, confidence=0.0, method="vc_skip",
-                                  status=DetectorStatus.SKIPPED)
+            return DetectorResult(
+                detector_name=self.name,
+                detector_type=self.detector_type,
+                score=0.5,
+                confidence=0.0,
+                method="vc_skip",
+                status=DetectorStatus.SKIPPED,
+            )
         sr = inp.audio_sr or 16000
         pitch = self._pitch(inp.audio_waveform, sr)
         prosody = self._prosody(inp.audio_waveform, sr)
         vocoder = self._vocoder(inp.audio_waveform, sr)
         score = 0.35 * pitch + 0.35 * prosody + 0.3 * vocoder
         return DetectorResult(
-            detector_name=self.name, detector_type=self.detector_type,
-            score=score, confidence=0.55, method="voice_clone_analysis",
+            detector_name=self.name,
+            detector_type=self.detector_type,
+            score=score,
+            confidence=0.55,
+            method="voice_clone_analysis",
             status=DetectorStatus.PASS,
-            details={"pitch_monotony": round(pitch, 4), "prosody": round(prosody, 4),
-                     "vocoder": round(vocoder, 4)})
+            details={"pitch_monotony": round(pitch, 4), "prosody": round(prosody, 4), "vocoder": round(vocoder, 4)},
+        )
 
     @staticmethod
     def _pitch(wav: np.ndarray, sr: int) -> float:
@@ -52,7 +60,7 @@ class VoiceCloneDetector(BaseDetector):
         hop = frame_len // 2
         pitches = []
         for i in range(0, len(wav) - frame_len, hop):
-            zc = np.sum(np.abs(np.diff(np.sign(wav[i:i+frame_len]))) > 0)
+            zc = np.sum(np.abs(np.diff(np.sign(wav[i : i + frame_len]))) > 0)
             f0 = zc * sr / (2 * frame_len)
             if 50 < f0 < 500:
                 pitches.append(f0)
@@ -68,8 +76,7 @@ class VoiceCloneDetector(BaseDetector):
     @staticmethod
     def _prosody(wav: np.ndarray, sr: int) -> float:
         fl = int(0.025 * sr)
-        energies = [float(np.sqrt(np.mean(wav[i:i+fl] ** 2)))
-                    for i in range(0, len(wav) - fl, fl // 2)]
+        energies = [float(np.sqrt(np.mean(wav[i : i + fl] ** 2))) for i in range(0, len(wav) - fl, fl // 2)]
         if len(energies) < 10:
             return 0.5
         diff = np.abs(np.diff(energies))

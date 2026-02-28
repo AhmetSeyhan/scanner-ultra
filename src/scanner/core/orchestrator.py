@@ -95,9 +95,7 @@ class ScanOrchestrator:
         known_fake = await self.hash_db.is_known_fake(content_hash)
 
         # === Step 5: Core Detection ===
-        visual_results, audio_results, text_results = await self._run_detectors(
-            detector_input, media_type
-        )
+        visual_results, audio_results, text_results = await self._run_detectors(detector_input, media_type)
 
         # Defense checks (parallel)
         defense_results = await self._run_defense(content, filename)
@@ -177,17 +175,15 @@ class ScanOrchestrator:
 
         # Store for API results endpoint
         from scanner.api.v1.results import store_result
+
         store_result(scan_id, result.model_dump(mode="json"))
 
-        logger.info("[%s] Scan complete — verdict=%s trust=%.2f (%.0fms)",
-                     scan_id, verdict.value, trust_score, elapsed)
+        logger.info("[%s] Scan complete — verdict=%s trust=%.2f (%.0fms)", scan_id, verdict.value, trust_score, elapsed)
         return result
 
     # ── Step 2: Preprocessing ──
 
-    async def _preprocess(
-        self, content: bytes, filename: str, media_type: MediaType
-    ) -> DetectorInput:
+    async def _preprocess(self, content: bytes, filename: str, media_type: MediaType) -> DetectorInput:
         """Run type-specific preprocessing."""
         frames = None
         fps = 0.0
@@ -199,6 +195,7 @@ class ScanOrchestrator:
         try:
             if media_type == MediaType.VIDEO:
                 from scanner.preprocessing.video_processor import VideoProcessor
+
                 vp = VideoProcessor()
                 vdata = await vp.process(content, filename)
                 frames = vdata.frames
@@ -208,6 +205,7 @@ class ScanOrchestrator:
 
             elif media_type == MediaType.IMAGE:
                 from scanner.preprocessing.image_processor import ImageProcessor
+
                 ip = ImageProcessor()
                 idata = await ip.process(content, filename)
                 image = idata.original
@@ -216,6 +214,7 @@ class ScanOrchestrator:
 
             elif media_type == MediaType.AUDIO:
                 from scanner.preprocessing.audio_processor import AudioProcessor
+
                 ap = AudioProcessor()
                 adata = await ap.process(content, filename)
                 audio_waveform = adata.waveform
@@ -223,6 +222,7 @@ class ScanOrchestrator:
 
             elif media_type == MediaType.TEXT:
                 from scanner.preprocessing.text_processor import TextProcessor
+
                 tp = TextProcessor()
                 tdata = await tp.process(content, filename)
                 text = tdata.cleaned
@@ -231,9 +231,13 @@ class ScanOrchestrator:
             logger.exception("Preprocessing failed for %s", filename)
 
         return DetectorInput(
-            frames=frames, fps=fps, video_path=None,
-            audio_waveform=audio_waveform, audio_sr=audio_sr,
-            image=image, text=text,
+            frames=frames,
+            fps=fps,
+            video_path=None,
+            audio_waveform=audio_waveform,
+            audio_sr=audio_sr,
+            image=image,
+            text=text,
             metadata={"filename": filename, "media_type": media_type.value},
         )
 
@@ -243,6 +247,7 @@ class ScanOrchestrator:
         """Assess input quality and return confidence weight."""
         try:
             from scanner.preprocessing.quality_adapter import QualityAdapter
+
             qa = QualityAdapter()
             if media_type == MediaType.VIDEO and inp.frames:
                 report = qa.assess_frames(inp.frames)
@@ -303,31 +308,33 @@ class ScanOrchestrator:
 
         return visual_results, audio_results, text_results
 
-    async def _run_group(
-        self, detectors: list, inp: DetectorInput
-    ) -> dict[str, dict[str, Any]]:
+    async def _run_group(self, detectors: list, inp: DetectorInput) -> dict[str, dict[str, Any]]:
         """Run a group of detectors concurrently with timeout."""
         if not detectors:
             return {}
 
         async def _run_one(det: Any) -> tuple[str, dict[str, Any]]:
             try:
-                result: DetectorResult = await asyncio.wait_for(
-                    det.detect(inp), timeout=self.detector_timeout
-                )
+                result: DetectorResult = await asyncio.wait_for(det.detect(inp), timeout=self.detector_timeout)
                 return det.name, result.to_dict()
             except asyncio.TimeoutError:
                 logger.warning("Detector %s timed out after %ds", det.name, self.detector_timeout)
                 return det.name, {
-                    "detector_name": det.name, "score": 0.5, "confidence": 0.0,
-                    "method": f"{det.name}_timeout", "status": "ERROR",
+                    "detector_name": det.name,
+                    "score": 0.5,
+                    "confidence": 0.0,
+                    "method": f"{det.name}_timeout",
+                    "status": "ERROR",
                     "details": {"error": "timeout"},
                 }
             except Exception as exc:
                 logger.error("Detector %s failed: %s", det.name, exc)
                 return det.name, {
-                    "detector_name": det.name, "score": 0.5, "confidence": 0.0,
-                    "method": f"{det.name}_error", "status": "ERROR",
+                    "detector_name": det.name,
+                    "score": 0.5,
+                    "confidence": 0.0,
+                    "method": f"{det.name}_error",
+                    "status": "ERROR",
                     "details": {"error": str(exc)},
                 }
 
@@ -372,12 +379,21 @@ class ScanOrchestrator:
 
         ext = filename.rsplit(".", 1)[-1].lower() if "." in filename else ""
         ext_map = {
-            "mp4": MediaType.VIDEO, "avi": MediaType.VIDEO, "mov": MediaType.VIDEO,
-            "mkv": MediaType.VIDEO, "webm": MediaType.VIDEO,
-            "jpg": MediaType.IMAGE, "jpeg": MediaType.IMAGE, "png": MediaType.IMAGE,
-            "webp": MediaType.IMAGE, "bmp": MediaType.IMAGE,
-            "mp3": MediaType.AUDIO, "wav": MediaType.AUDIO, "flac": MediaType.AUDIO,
+            "mp4": MediaType.VIDEO,
+            "avi": MediaType.VIDEO,
+            "mov": MediaType.VIDEO,
+            "mkv": MediaType.VIDEO,
+            "webm": MediaType.VIDEO,
+            "jpg": MediaType.IMAGE,
+            "jpeg": MediaType.IMAGE,
+            "png": MediaType.IMAGE,
+            "webp": MediaType.IMAGE,
+            "bmp": MediaType.IMAGE,
+            "mp3": MediaType.AUDIO,
+            "wav": MediaType.AUDIO,
+            "flac": MediaType.AUDIO,
             "ogg": MediaType.AUDIO,
-            "txt": MediaType.TEXT, "md": MediaType.TEXT,
+            "txt": MediaType.TEXT,
+            "md": MediaType.TEXT,
         }
         return ext_map.get(ext, MediaType.IMAGE)
